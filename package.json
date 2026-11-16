@@ -1,0 +1,24 @@
+{
+  "name": "lamnian-app",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Lamnian community app (Android) built with Capacitor from the Lamnian website",
+  "scripts": {
+    "android:add": "cap add android",
+    "sync": "cap sync android",
+    "open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.4.0",
+    "@capacitor/core": "^8.4.0",
+    "@capacitor/share": "^8.0.0",
+    "@capacitor/browser": "^8.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^8.4.0"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

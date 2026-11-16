@@ -1,0 +1,11 @@
+{
+  "appId": "com.lamnian.app",
+  "appName": "Lamnian",
+  "webDir": "www",
+  "backgroundColor": "#f6f4ee",
+  "server": { "androidScheme": "https" },
+  "plugins": {
+    "SystemBars": { "insetsHandling": "css" },
+    "FirebaseAuthentication": { "skipNativeAuth": true, "providers": ["google.com"] }
+  }
+}

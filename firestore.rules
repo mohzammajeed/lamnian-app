@@ -1,0 +1,108 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() { return request.auth != null; }
+    function isAdmin() {
+      return signedIn()
+        && request.auth.token.email == 'mohzammajeed@gmail.com'
+        && request.auth.token.email_verified == true;
+    }
+    function likePath(lid) { return /databases/$(database)/documents/likes/$(lid); }
+
+    // like counter: +1 only together with creating my like doc, -1 only together with deleting it
+    function likeOk(id) {
+      let lid = id + '_' + request.auth.uid;
+      let old = resource.data.get('likeCount', 0);
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount'])
+        && ((request.resource.data.likeCount == old + 1 && !exists(likePath(lid)) && existsAfter(likePath(lid)))
+         || (request.resource.data.likeCount == old - 1 && old > 0 && exists(likePath(lid)) && !existsAfter(likePath(lid))));
+    }
+
+    // the author can edit only title, body and the edited stamp
+    function ownerEdit() {
+      return resource.data.uid == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['title', 'body', 'edited'])
+        && request.resource.data.title is string
+        && request.resource.data.title.size() > 0
+        && request.resource.data.title.size() <= 120
+        && (!('body' in request.resource.data) || request.resource.data.body.size() <= 1000);
+    }
+
+    // ---- posts ----
+    match /{col}/{id} {
+      allow read: if col in ['news','gallery','events','notices','directory'];
+
+      allow create: if col in ['news','gallery','events','notices','directory']
+                    && signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && !('likeCount' in request.resource.data)
+                    && request.resource.data.title is string
+                    && request.resource.data.title.size() > 0
+                    && request.resource.data.title.size() <= 120
+                    && request.resource.data.keys().size() <= 12
+                    && (!('body' in request.resource.data) || request.resource.data.body.size() <= 1000)
+                    && (!('image' in request.resource.data)
+                        || (request.resource.data.image is string
+                            && request.resource.data.image.size() < 400000));
+
+      allow update: if col in ['news','gallery','events','notices','directory']
+                    && signedIn()
+                    && (isAdmin() || ownerEdit() || likeOk(id));
+
+      allow delete: if col in ['news','gallery','events','notices','directory']
+                    && signedIn()
+                    && (isAdmin() || resource.data.uid == request.auth.uid);
+    }
+
+    // ---- comments ----
+    match /comments/{id} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.postId is string
+                    && request.resource.data.postId.size() <= 100
+                    && request.resource.data.text is string
+                    && request.resource.data.text.size() > 0
+                    && request.resource.data.text.size() <= 500
+                    && request.resource.data.keys().size() <= 8;
+      allow delete: if signedIn() && (isAdmin() || resource.data.uid == request.auth.uid);
+    }
+
+    // ---- likes (one doc per user per post) ----
+    match /likes/{lid} {
+      allow read: if true;
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && lid == request.resource.data.postId + '_' + request.auth.uid
+                    && request.resource.data.keys().size() <= 4;
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ---- reports (only the admin can read them) ----
+    match /reports/{rid} {
+      allow read, delete: if isAdmin();
+      allow create: if signedIn()
+                    && request.resource.data.uid == request.auth.uid
+                    && rid == request.resource.data.postId + '_' + request.auth.uid
+                    && request.resource.data.reason is string
+                    && request.resource.data.reason.size() <= 60
+                    && request.resource.data.keys().size() <= 8;
+    }
+
+    // ---- public profiles (each user edits only their own) ----
+    match /users/{uid} {
+      allow read: if true;
+      allow create: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(['name','photo','bio','joined'])
+                    && request.resource.data.keys().hasAll(['name','joined'])
+                    && request.resource.data.name.size() <= 60;
+      allow update: if signedIn() && request.auth.uid == uid
+                    && request.resource.data.keys().hasOnly(['name','photo','bio','joined'])
+                    && request.resource.data.joined == resource.data.joined
+                    && request.resource.data.name.size() <= 60
+                    && (!('bio' in request.resource.data) || request.resource.data.bio.size() <= 200);
+      allow delete: if signedIn() && request.auth.uid == uid;
+    }
+  }
+}

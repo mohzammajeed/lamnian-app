@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "90954222339",
+    "firebase_url": "https://lamnian-ai-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "lamnian-ai",
+    "storage_bucket": "lamnian-ai.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:90954222339:android:14b43d27cc5ae3ee973736",
+        "android_client_info": {
+          "package_name": "com.lamnian.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "90954222339-c3rt9fu0np3uvi5qfb2g1ehe8ic81job.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.lamnian.app",
+            "certificate_hash": "7ab1a9f6b57242bc6039638be830268f5a95e852"
+          }
+        },
+        {
+          "client_id": "90954222339-7ov06gqr99gpuldlch18p95vkuu9dil4.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDnWE9LhD273ge4_Tet62F5BHf05A2uuI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "90954222339-7ov06gqr99gpuldlch18p95vkuu9dil4.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
